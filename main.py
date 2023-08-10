@@ -135,6 +135,7 @@ def batch_transcode(
     - Output file/folder
         - If file is outside: <original_file_name>.<format>
         - If file inside (sub)folder(s): <parent>_<format>/.../<original_file_name>.<format>
+    - Set threads to 1 to show progress
     """
     if len(input_paths) == 0:
         return [], []
@@ -144,7 +145,8 @@ def batch_transcode(
         "png": 'ffmpeg -i "{}" -c:v png -compression_level 6{} "{}"',
     }
 
-    threads = 1 if format == "avif" else threads
+    if format in ("avif", "mp4"):
+        threads = 1
 
     output_paths: list[str] = []
     for path in input_paths:
@@ -159,8 +161,8 @@ def batch_transcode(
 
     overwrite_flag = " -y" if overwrite else ""
 
-    def __helper(input_path: str, output_path: str):
-        nonlocal overwrite_flag, format
+    def __helper(input_path: str, output_path: str) -> tuple[str, str]:
+        nonlocal overwrite_flag, format, threads
         if os.path.exists(output_path) and not overwrite:
             return "skipped", input_path
 
@@ -170,12 +172,16 @@ def batch_transcode(
         elif commands[format].startswith("cjxl"):
             cmd = cmd.format(input_path, output_path)
 
-        log_file = open(f"transcode_{format}.log", "a") if bool_env["logging"] else subprocess.DEVNULL
+        if threads > 1:
+            sp_output = open(f"transcode_{format}.log", "a") if bool_env["logging"] else subprocess.DEVNULL
+        else:
+            sp_output = None
+            cmd = cmd.replace("ffmpeg", "ffpb")
         subprocess.run(
             cmd,
             shell=True,
-            stdout=log_file,
-            stderr=log_file,
+            stdout=sp_output,
+            stderr=sp_output,
         )
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
             return "", ""
@@ -186,10 +192,15 @@ def batch_transcode(
         "skipped": [],
         "": [],
     }
-    with ThreadPoolExecutor(max_workers=threads) as executor:
-        futures = [executor.submit(__helper, i, o) for i, o in zip(input_paths, output_paths)]
-        for future in as_completed(futures):
-            status, path = future.result()
+    if threads > 1:
+        with ThreadPoolExecutor(max_workers=threads) as executor:
+            futures = [executor.submit(__helper, i, o) for i, o in zip(input_paths, output_paths)]
+            for future in as_completed(futures):
+                status, path = future.result()
+                return_data[status].append(path)
+    else:
+        for i, o in zip(input_paths, output_paths):
+            status, path = __helper(i, o)
             return_data[status].append(path)
 
     return return_data["failed"], return_data["skipped"]
