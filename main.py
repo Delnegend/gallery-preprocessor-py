@@ -575,6 +575,13 @@ class MainMenu:
             self.__print_small_sign(f"{progress} 【{pack}】")
             images = list_files(pack, [".png", ".jpg"], True)
 
+            png_dir = pack + "_png"
+            jxl_dir = pack + "_jxl"
+            avif_dir = pack + "_avif"
+            mp4_dir = pack + "_mp4"
+            upscaled_dir = pack + "_upscaled"
+            for i in [png_dir, jxl_dir, avif_dir, mp4_dir, upscaled_dir]:
+                os.makedirs(i, exist_ok=True)
             if reprocess:
                 print("👉 Transcoding images losslessly to PNG...")
                 update_discord_progress(0, pack, progress)
@@ -602,13 +609,11 @@ class MainMenu:
 
             if not reprocess:
                 print("👉 Archiving JXL images to 7z...")
-                jxl_dir = pack + "_jxl"
                 update_discord_progress(4, pack, progress)
                 failed_archive_jxl = single_compress(jxl_dir, pack, "7z", [".jxl", ".gif", ".mp4"])
                 print(f"  Failed to archive {jxl_dir} to 7z") if failed_archive_jxl != "" else shutil.rmtree(jxl_dir)
 
             print("👉 Archiving AVIF images to zip...")
-            avif_dir = upscaled_dir + "_avif"
             update_discord_progress(5, pack, progress)
             failed_archive_avif = single_compress(avif_dir, pack, "zip", [".avif"])
             print(f"  Failed to archive {avif_dir} to zip") if failed_archive_avif != "" else shutil.rmtree(avif_dir)
