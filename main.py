@@ -145,6 +145,7 @@ def batch_transcode(
         "avif": 'ffmpeg -i "{input}" -c:v libsvtav1 -pix_fmt yuv420p10le -crf 24 -preset 6 -vf "scale=ceil(iw/2)*2:ceil(ih/2)*2"{overwrite_flag} "{output}"',
         "jxl": 'cjxl -q 100 -e 8 "{input}" "{output}"',
         "png": 'ffmpeg -i "{input}" -c:v png -compression_level 6{overwrite_flag} "{output}"',
+        "mp4": 'ffmpeg -i "{input}" -c:v libsvtav1 -pix_fmt yuv420p10le -crf 24 -preset 6 -vf "scale=-1:\'min(1440,ih)\'"{overwrite_flag} "{output}"',
     }
 
     if format in ("avif", "mp4"):
