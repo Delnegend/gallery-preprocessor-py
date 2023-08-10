@@ -162,6 +162,11 @@ def batch_transcode(
     overwrite_flag = " -y" if overwrite else ""
 
     def __helper(input_path: str, output_path: str) -> tuple[str, str]:
+        """Run the transcoding command and return the status
+        Returns
+        - (str): The status of the transcoding (failed, skipped, or empty string if successful)
+        - (str): The path of the input file
+        """
         nonlocal overwrite_flag, format, threads
         if os.path.exists(output_path) and not overwrite:
             return "skipped", input_path
