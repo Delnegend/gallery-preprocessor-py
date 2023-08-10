@@ -288,20 +288,20 @@ def single_upscale(
 
 
 def batch_resize(
-    input_paths: list[str], threads: int = 4, target_width: int = 0, target_height: int = 0
-) -> tuple[list[str], str]:
+    input_paths: list[str], output_folder: str, threads: int = 4, target_width: int = 0, target_height: int = 0
+) -> list[str]:
     """
     Upscale a list of images
 
     Params
     - input_paths (list[str]): A list of images to upscale
+    - output_folder (str): The folder to output the upscaled images
     - threads (int): Number of threads to use
     - target_width (int): The target width
     - target_height (int): The target height
 
     Returns
     - (list[str]): A list of images that failed to upscale
-    - (str): The output folder
 
     Notes
     - Output file/folder
@@ -310,11 +310,12 @@ def batch_resize(
     """
     if input_paths == []:
         return []
+
     output_paths: list[str] = []
     for path in input_paths:
         path_elements = norm(path).split("/")
         if len(path_elements) > 1:  # sits in a folder
-            path_elements[0] += "_upscaled"
+            path_elements[0] = output_folder
         path_elements[-1] = os.path.splitext(path_elements[-1])[0] + ".png"  # change extension
         output_path = "/".join(path_elements)
         if (out_dir := os.path.dirname(output_path)) and (not os.path.exists(out_dir)):  # create out_dir if not exists
@@ -365,7 +366,7 @@ def batch_resize(
             if not future.result()[0]:
                 failed.append(future.result()[1])
 
-    return failed, os.path.dirname(output_paths[0])
+    return failed
 
 
 def single_compress(input_path: str, output_path: str, format: str, whitelist_ext: list[str] = ["*"]) -> str:
@@ -588,8 +589,7 @@ class MainMenu:
 
             print("👉 Resizing images if needed...")
             update_discord_progress(2, pack, progress)
-            failed_2_resize, upscaled_dir = batch_resize(images, target_width=2500, target_height=0)
-            self.__handle_error("resize_", failed_2_resize, [])
+            self.__handle_error("resize_", batch_resize(images, upscaled_dir, target_width=2500, target_height=0), [])
 
             print("👉 Compressing resized images to AVIF...")
             update_discord_progress(3, pack, progress)
