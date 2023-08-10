@@ -82,6 +82,8 @@ def list_files(path: str, ext: list[str], recursive: bool = False) -> list[str]:
     - ext (tuple[str]): The extension of the files to list
     - recursive (bool): Whether to list files recursively
     """
+    if path == "":
+        return []
     files: list[str] = []
     for i in os.listdir(path):
         if os.path.isfile(os.path.join(path, i)) and i.endswith(tuple(ext)):
@@ -134,6 +136,8 @@ def batch_transcode(
         - If file is outside: <original_file_name>.<format>
         - If file inside (sub)folder(s): <parent>_<format>/.../<original_file_name>.<format>
     """
+    if len(input_paths) == 0:
+        return [], []
     commands = {
         "avif": 'ffmpeg -i "{}" -c:v libsvtav1 -pix_fmt yuv420p10le -crf 24 -preset 6 -vf "scale=ceil(iw/2)*2:ceil(ih/2)*2"{} "{}"',
         "jxl": 'cjxl -q 100 -e 8 "{}" "{}"',
@@ -288,6 +292,8 @@ def batch_resize(
         - If file is outside: <original_file_name>_upscaled.png
         - If file inside (sub)folder(s): <parent>_upscaled/.../<original_file_name>_upscaled.png
     """
+    if input_paths == []:
+        return []
     output_paths: list[str] = []
     for path in input_paths:
         path_elements = norm(path).split("/")
