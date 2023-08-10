@@ -596,6 +596,15 @@ class MainMenu:
                 failed_2_jxl, skipped_2_jxl = batch_transcode(images, "jxl", bool_env["overwrite"])
                 self.__handle_error("transcode_jxl", failed_2_jxl, skipped_2_jxl)
 
+                print("👉 Copying animations into jxl folder...")
+                for i in os.listdir(pack):
+                    if not self.__endswith(i, [".mp4", ".gif", ".webm"]):
+                        continue
+                    # skip if file already exists in jxl folder
+                    if os.path.isfile(os.path.join(jxl_dir, i)):
+                        continue
+                    shutil.copy(os.path.join(pack, i), os.path.join(jxl_dir, i))
+
             print("👉 Resizing images if needed...")
             update_discord_progress(2, pack, progress)
             self.__handle_error("resize_", batch_resize(images, upscaled_dir, target_width=2500, target_height=0), [])
@@ -607,15 +616,25 @@ class MainMenu:
             )
             self.__handle_error("transcode_avif", failed_2_avif, skipped_2_avif)
 
+            print("👉 Transcoding animations into .mp4 (av1)...")
+            # update_discord_progress(4, pack, progress)
+            failed_2_mp4, skipped_2_mp4 = batch_transcode(
+                list_files(pack, [".mp4", ".gif", ".webm"], True), "mp4", bool_env["overwrite"], 1
+            )
+            self.__handle_error("transcode_mp4", failed_2_mp4, skipped_2_mp4)
+            for i in os.listdir(mp4_dir):
+                shutil.move(os.path.join(pack + "_mp4", i), os.path.join(pack + "_avif", i))
+            shutil.rmtree(pack + "_mp4")
+
             if not reprocess:
-                print("👉 Archiving JXL images to 7z...")
+                print("👉 Archiving .jxl, .gif, .mp4, .webm files into .7z...")
                 update_discord_progress(4, pack, progress)
                 failed_archive_jxl = single_compress(jxl_dir, pack, "7z", [".jxl", ".gif", ".mp4"])
                 print(f"  Failed to archive {jxl_dir} to 7z") if failed_archive_jxl != "" else shutil.rmtree(jxl_dir)
 
-            print("👉 Archiving AVIF images to zip...")
+            print("👉 Archiving .avif, .mp4 (av1) files into .zip...")
             update_discord_progress(5, pack, progress)
-            failed_archive_avif = single_compress(avif_dir, pack, "zip", [".avif"])
+            failed_archive_avif = single_compress(avif_dir, pack, "zip", [".avif", ".mp4"])
             print(f"  Failed to archive {avif_dir} to zip") if failed_archive_avif != "" else shutil.rmtree(avif_dir)
 
             notify(pack, f"{progress}【{pack}】finished processing")
