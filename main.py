@@ -137,6 +137,7 @@ def batch_transcode(
         - If file is outside: <original_file_name>.<format>
         - If file inside (sub)folder(s): <parent>_<format>/.../<original_file_name>.<format>
     - Set threads to 1 to show progress
+    - .avif and .mp4 files will be transcoded with 1 thread, regardless of the threads parameter
     """
     if len(input_paths) == 0:
         return [], []
