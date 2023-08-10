@@ -84,6 +84,7 @@ def list_files(path: str, ext: list[str], recursive: bool = False) -> list[str]:
     """
     if path == "":
         return []
+
     files: list[str] = []
     for i in os.listdir(path):
         if os.path.isfile(os.path.join(path, i)) and i.endswith(tuple(ext)):
