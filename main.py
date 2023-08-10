@@ -515,13 +515,13 @@ class MainMenu:
 
     def __get_jxl_folders(self) -> list[str]:
         """
-        Get a list of folders containing JXL images
+        Get a list of folders containing .jxl, .mp4, .webm, .gif
         """
         return_list: list[str] = []
         for i in os.listdir():
             if not os.path.isdir(i):
                 continue
-            if not any([self.__endswith(i, [".jxl"]) for i in os.listdir(i)]):
+            if not any([self.__endswith(i, [".jxl", ".mp4", ".webm", ".gif"]) for i in os.listdir(i)]):
                 continue
             return_list.append(i)
         return return_list
@@ -539,6 +539,8 @@ class MainMenu:
             case _:
                 raise ValueError("msg_type must be one of transcode, resize")
 
+        if format == "mp4":
+            msg = msg.replace("images", "animations")
         if len(failed_list) > 0:
             print("  " + msg)
             for i in failed_list:
