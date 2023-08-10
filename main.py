@@ -141,6 +141,7 @@ def batch_transcode(
     """
     if len(input_paths) == 0:
         return [], []
+
     commands = {
         "avif": 'ffmpeg -i "{input}" -c:v libsvtav1 -pix_fmt yuv420p10le -crf 24 -preset 6 -vf "scale=ceil(iw/2)*2:ceil(ih/2)*2"{overwrite_flag} "{output}"',
         "jxl": 'cjxl -q 100 -e 8 "{input}" "{output}"',
@@ -541,6 +542,7 @@ class MainMenu:
 
         if format == "mp4":
             msg = msg.replace("images", "animations")
+
         if len(failed_list) > 0:
             print("  " + msg)
             for i in failed_list:
@@ -582,6 +584,7 @@ class MainMenu:
             upscaled_dir = pack + "_upscaled"
             for i in [png_dir, jxl_dir, avif_dir, mp4_dir, upscaled_dir]:
                 os.makedirs(i, exist_ok=True)
+
             if reprocess:
                 print("👉 Transcoding images losslessly to PNG...")
                 update_discord_progress(0, pack, progress)
