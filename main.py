@@ -142,9 +142,9 @@ def batch_transcode(
     if len(input_paths) == 0:
         return [], []
     commands = {
-        "avif": 'ffmpeg -i "{}" -c:v libsvtav1 -pix_fmt yuv420p10le -crf 24 -preset 6 -vf "scale=ceil(iw/2)*2:ceil(ih/2)*2"{} "{}"',
-        "jxl": 'cjxl -q 100 -e 8 "{}" "{}"',
-        "png": 'ffmpeg -i "{}" -c:v png -compression_level 6{} "{}"',
+        "avif": 'ffmpeg -i "{input}" -c:v libsvtav1 -pix_fmt yuv420p10le -crf 24 -preset 6 -vf "scale=ceil(iw/2)*2:ceil(ih/2)*2"{overwrite_flag} "{output}"',
+        "jxl": 'cjxl -q 100 -e 8 "{input}" "{output}"',
+        "png": 'ffmpeg -i "{input}" -c:v png -compression_level 6{overwrite_flag} "{output}"',
     }
 
     if format in ("avif", "mp4"):
@@ -174,10 +174,7 @@ def batch_transcode(
             return "skipped", input_path
 
         cmd = commands[format]
-        if commands[format].startswith("ffmpeg"):
-            cmd = cmd.format(input_path, overwrite_flag, output_path)
-        elif commands[format].startswith("cjxl"):
-            cmd = cmd.format(input_path, output_path)
+        cmd = cmd.format(input=input_path, overwrite_flag=overwrite_flag, output=output_path)
 
         if threads > 1:
             sp_output = open(f"transcode_{format}.log", "a") if bool_env["logging"] else subprocess.DEVNULL
