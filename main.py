@@ -609,7 +609,7 @@ class MainMenu:
             update_discord_progress(2, pack, progress)
             self.__handle_error("resize_", batch_resize(images, upscaled_dir, target_width=2500, target_height=0), [])
 
-            print("👉 Compressing resized images to AVIF...")
+            print("👉 Transcoding resized images into .avif...")
             update_discord_progress(3, pack, progress)
             failed_2_avif, skipped_2_avif = batch_transcode(
                 list_files(upscaled_dir, [".png"], True), "avif", bool_env["overwrite"], 1
