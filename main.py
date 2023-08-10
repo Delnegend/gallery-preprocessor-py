@@ -27,14 +27,6 @@ class BCOLORS:
     RESET = "\033[0m"
 
 
-def check_binary(*binaries: str):
-    """Check if all required binaries are in PATH"""
-    for i in binaries:
-        if shutil.which(i) is None:
-            print(f"{i} not found in PATH")
-            exit(1)
-
-
 def norm(path: str) -> str:
     """os.path.normpath() but replace backslash with forward slash"""
     return os.path.normpath(path).replace("\\", "/")
@@ -685,7 +677,9 @@ def main():
 
 
 if __name__ == "__main__":
-    check_binary("ffmpeg", "ffprobe", "7z", "cjxl")
+    for binary in ("ffmpeg", "ffprobe", "7z", "cjxl"):
+        if shutil.which(binary) is None:
+            print(f"Binary {binary} not found in PATH")
     try:
         main()
     except KeyboardInterrupt:
