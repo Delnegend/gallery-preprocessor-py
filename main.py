@@ -47,29 +47,6 @@ def notify(title: str, description: str, username: str = "Gallery preprocessor")
     )
 
 
-def update_discord_progress(stage_idx: int, pack: str, progress: str):
-    stages = [
-        "Preprocessing",
-        "Transcoding to JXL",
-        "Upscaling",
-        "Compressing to AVIF",
-        "Archiving to 7z",
-        "Archiving to zip",
-    ]
-
-    # fmt: off
-    requests.patch(
-        str_env["webhook"] + "/messages/" + str_env["constant_msg_id"],
-        json={
-        "embeds": [{
-            "title": f"{progress} | {pack}",
-            "description": dedent(f"""\
-                **Stage {stage_idx}/{len(stages)-1}**: {stages[stage_idx]}\
-            """).strip()}]
-    })
-    # fmt: on
-
-
 def list_files(path: str, ext: list[str], recursive: bool = False) -> list[str]:
     """
     List all files in a directory with a specific extension
