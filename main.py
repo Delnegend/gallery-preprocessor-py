@@ -8,16 +8,13 @@ from zipfile import ZipFile
 
 import requests
 
-bool_env = {
-    "logging": True,
-    "overwrite": False,
-}
 
-str_env = {
-    "webhook": "https://discord.com/api/webhooks/1130259221657694349/A4UwVh3JktN0cX2OKjJuzZ1lh8Ysjup6fYr_UvWkBoH26mDok_Ca0w21dVXh8MWaVFU3",
-    "constant_msg_id": "1131964675874095105",
-}
-
+class Config:
+    webhook = "https://discord.com/api/webhooks/1130259221657694349/A4UwVh3JktN0cX2OKjJuzZ1lh8Ysjup6fYr_UvWkBoH26mDok_Ca0w21dVXh8MWaVFU3"
+    logging = True
+    overwrite = False
+    use_higher_quality_model_for_4x = False
+    force_higher_quality_model = False # if True overrides use_higher_quality_model_for_4x
 
 class BCOLORS:
     GREEN = "\033[92m"
@@ -42,7 +39,7 @@ def notify(title: str, description: str, username: str = "Gallery preprocessor")
     - username (str): The username of the webhook
     """
     requests.post(
-        str_env["webhook"],
+        Config.webhook,
         json={
             "embeds": [{"title": title, "description": description}],
             "username": username,
