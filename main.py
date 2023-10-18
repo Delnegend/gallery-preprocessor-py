@@ -8,16 +8,13 @@ from zipfile import ZipFile
 
 import requests
 
-bool_env = {
-    "logging": True,
-    "overwrite": False,
-}
 
-str_env = {
-    "webhook": "",
-    "constant_msg_id": "",
-}
-
+class Config:
+    webhook = ""
+    logging = True
+    overwrite = False
+    use_higher_quality_model_for_4x = False
+    force_higher_quality_model = False # if True overrides use_higher_quality_model_for_4x
 
 class BCOLORS:
     GREEN = "\033[92m"
@@ -42,7 +39,7 @@ def notify(title: str, description: str, username: str = "Gallery preprocessor")
     - username (str): The username of the webhook
     """
     requests.post(
-        str_env["webhook"],
+        Config.webhook,
         json={
             "embeds": [{"title": title, "description": description}],
             "username": username,
