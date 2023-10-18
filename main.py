@@ -527,31 +527,6 @@ class MainMenu:
             return_list.append(i)
         return return_list
 
-    def __handle_error(self, msg_command: str, failed_list: list[str], skipped_list: list[str]) -> None:
-        if len(msg_command.split("_")) != 2:
-            raise ValueError("msg_command must be in the format of <command>_<image format>")
-        msg_type, format = msg_command.split("_")
-        msg = ""
-        match msg_type:
-            case "transcode":
-                msg = f"Failed to transcode the following images to {format}:"
-            case "resize":
-                msg = "Failed to resize the following images:"
-            case _:
-                raise ValueError("msg_type must be one of transcode, resize")
-
-        if format == "mp4":
-            msg = msg.replace("images", "animations")
-
-        if len(failed_list) > 0:
-            print("  " + msg)
-            for i in failed_list:
-                print(f"    {i}")
-        if len(skipped_list) > 0:
-            print("  Skipped the following images:")
-            for i in skipped_list:
-                print(f"    {i}")
-
     # ----- MAIN FUNCTIONS -----
 
     def multiple_pack(self, packs: list[str] = [], reprocess: bool = False) -> None:
