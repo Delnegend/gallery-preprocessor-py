@@ -228,7 +228,10 @@ def single_upscale(
         scale = math.ceil(target_height / height)
     scale = min(scale, 4)
 
-    model = "realesrgan-x4plus-anime" if scale == 4 else "realesr-animevideov3"
+    model = "realesr-animevideov3"
+    if (scale == 4 and Config.use_higher_quality_model_for_4x) or Config.force_higher_quality_model:
+        model = "realesrgan-x4plus-anime"
+
     subprocess.run(
         f'realesrgan-ncnn-vulkan -i "{in_file}" -o "{out_file}" -s {scale} -n {model} -f png',
         shell=True,
