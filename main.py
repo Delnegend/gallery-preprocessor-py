@@ -267,14 +267,14 @@ def single_upscale(
 
 
 def batch_resize(
-    in_files: list[str], out_folder: str, threads: int = 4, target_width: int = 0, target_height: int = 0
+    in_files: list[str], out_dir: str, threads: int = 2, target_width: int = 0, target_height: int = 0
 ) -> list[str]:
     """
     Upscale a list of images
 
     Params
     - in_files (list[str]): A list of images to upscale
-    - out_folder (str): The folder to output the upscaled images
+    - out_dir (str): The folder to output the upscaled images
     - threads (int): Number of threads to use
     - target_width (int): The target width
     - target_height (int): The target height
@@ -283,7 +283,7 @@ def batch_resize(
     - (list[str]): A list of images that failed to upscale
 
     Notes
-    - Out_folder == "": <parent>_upscaled/.../<original_file_name>.png
+    - out_dir == "": <parent>_upscaled/.../<original_file_name>.png
     """
     if in_files == []:
         return []
@@ -292,7 +292,7 @@ def batch_resize(
     for file in in_files:
         path_elements = norm(file).split("/")
         if len(path_elements) > 1:  # sits in a folder
-            path_elements[0] = out_folder
+            path_elements[0] = out_dir
         path_elements[-1] = os.path.splitext(path_elements[-1])[0] + ".png"  # change extension
         output_path = "/".join(path_elements)
         if (out_dir := os.path.dirname(output_path)) and (not os.path.exists(out_dir)):  # create out_dir if not exists
