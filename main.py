@@ -395,17 +395,8 @@ class MainMenu:
     # ----- HELPER FUNCTIONS -----
 
     def __print_small_sign(self, msg: str):
-        print(
-            BCOLORS.RED
-            + "|=====["
-            + BCOLORS.RESET
-            + BCOLORS.BLUE
-            + msg
-            + BCOLORS.RESET
-            + BCOLORS.RED
-            + "]=====|"
-            + BCOLORS.RESET
-        )
+        R, B, RE = BCOLORS.RED, BCOLORS.BLUE, BCOLORS.RESET
+        print(f"{R}|=====[{RE}{B}{msg}{RE}{R}|====|{RE}")
 
     def __endswith(self, string: str, suffixes: list[str]) -> bool:
         for i in suffixes:
