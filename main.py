@@ -532,9 +532,7 @@ class MainMenu:
                 message += f"\n  Failed transcode to AVIF:\n    {failed_avif_transcode}"
             if failed_mp4_transocde != []:
                 message += f"\n  Failed transcode to MP4:\n    {failed_mp4_transocde}"
-            notify(pack, message)
-
-        notify("Finished processing", "Finished processing all packs")
+            notify(progress, message)
 
     def one_pack(self, reprocess: bool = False):
         if reprocess:
