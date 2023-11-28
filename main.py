@@ -474,9 +474,9 @@ class MainMenu:
             failed_png_transcode: list[str] = []
             if reprocess:
                 print("👉 Transcoding images losslessly to PNG...")
-                failed_png_transcode += batch_transcode(
-                    list_files(pack, [".jxl"], True), png_dir, "png", Config.overwrite
-                )[0]
+                failed_png_transcode += batch_transcode(list_files(pack, [".jxl"], True), png_dir, "png", Config.overwrite)[
+                    0
+                ]
                 images = list_files(png_dir, [".png"], True)
 
             failed_jxl_transcode: list[str] = []
