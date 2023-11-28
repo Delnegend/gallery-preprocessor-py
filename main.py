@@ -3,7 +3,6 @@ import os
 import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from zipfile import ZipFile
 
 import requests
 
@@ -380,69 +379,6 @@ def single_compress(input_path: str, output_path: str, format: str, whitelist_ex
     return ""
 
 
-def batch_calculate_blurhash(input_zips: list[str], threads: int = 16) -> tuple[list[str], dict[str, dict[str, list[str]]]]:
-    """
-    Calculate blurhash for all images in a list of zip files
-
-    Params
-    - input_zips (list[str]): A list of zip files to calculate blurhash
-    - threads (int): Number of threads to use
-
-    Returns
-    - (list[str]): A list of images that failed to calculate blurhash
-    """
-
-    failed: list[str] = []
-    final_data: dict[str, dict[str, list[str]]] = {}
-    # {
-    #     "path/to/zip": {
-    #         "image1": [<blurhash>, <width>, <height>],
-    #         "image2": [<blurhash>, <width>, <height>],
-    #     }
-    #     "path/to/zip2": {
-    #         "image1": [<blurhash>, <width>, <height>],
-    #         "image2": [<blurhash>, <width>, <height>],
-    #     }
-    # }
-
-    def __helper(file: str, temp_path: str, zip_file: str) -> tuple[str, str, list[str]]:
-        if not file.endswith((".png", ".jpg", ".jpeg", ".avif", ".jxl")):
-            return "skipped", file.replace(temp_path, zip_file), ["", "", ""]
-        width, height = get_dimension(file)
-        blur_hash = subprocess.run(
-            f'blurhash-cli "{file}"',
-            shell=True,
-            capture_output=True,
-        )
-        if blur_hash.returncode != 0:
-            return "failed", file.replace(temp_path, zip_file), ["", "", ""]
-        blur_hash = blur_hash.stdout.decode("utf-8").strip()
-        return "success", file.replace(temp_path, zip_file), [blur_hash, str(width), str(height)]
-
-    temp_path = "blurhash_temp"
-    for zip_path in input_zips:
-        with ZipFile(zip_path, "r") as zip_file:
-            zip_file.extractall(path=temp_path)
-            files = list_files(temp_path, [".png", ".jpg", ".jpeg", ".avif", ".jxl"], True)
-            with ThreadPoolExecutor(max_workers=threads) as executor:
-                futures = [executor.submit(__helper, file, temp_path, zip_path) for file in files]
-                for future in as_completed(futures):
-                    status, file, data = future.result()
-                    match status:
-                        case "failed":
-                            failed.append(os.path.join(zip_path, data[0]))
-                            continue
-                        case "success":
-                            if zip_path not in final_data:
-                                final_data[zip_path] = {}
-                            final_data[zip_path][file] = data
-                        case _:
-                            continue
-        shutil.rmtree(temp_path)
-
-    return failed, final_data
-
-
 class MainMenu:
     def __init__(self, options: dict[int | str, str]):
         for key, value in options.items():
@@ -617,28 +553,6 @@ class MainMenu:
 
         self.multiple_pack([folders[int(selected_idx)]], reprocess)
 
-    def re_calculate_blurhash(self):
-        zip_files = list_files(".", [".zip"], True)
-        if len(zip_files) == 0:
-            return
-
-        print("These zip files will be processed:")
-        for i in zip_files:
-            print(f"  {i}")
-
-        if input("Continue? (y/n): ").lower() != "y":
-            return
-
-        falied_blurhash, blurhash_data = batch_calculate_blurhash(zip_files)
-        if len(falied_blurhash) > 0:
-            print("  Failed to calculate blurhash for the following images:")
-            for i in falied_blurhash:
-                print(f"    {i}")
-        with open("metadata.json", "w", encoding="utf-8") as f:
-            f.write(str(blurhash_data))
-
-        notify("Re-calculated blurhash", "Re-calculated blurhash for all images")
-
 
 def main():
     last_msg = ""
@@ -655,8 +569,6 @@ def main():
                 3: "Reprocess multiple packs",
                 4: "Reprocess one pack",
                 "div2": "",
-                5: "Re-calculate blurhash",
-                "div3": "",
                 "else": "Exit",
             }
         )
@@ -671,8 +583,6 @@ def main():
                 menu.multiple_pack(reprocess=True)
             case "4":
                 menu.one_pack(reprocess=True)
-            case "5":
-                menu.re_calculate_blurhash()
             case _:
                 raise KeyboardInterrupt
 
