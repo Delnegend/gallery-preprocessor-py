@@ -464,8 +464,8 @@ class MainMenu:
             os.makedirs(png_dir, exist_ok=True) if reprocess else None
             jxl_dir = pack + "_jxl"
             os.makedirs(jxl_dir, exist_ok=True) if not reprocess else None
-            avif_dir = pack + "_avif"
-            os.makedirs(avif_dir, exist_ok=True)
+            dist_dir = pack + "_dist"
+            os.makedirs(dist_dir, exist_ok=True)
             mp4_dir = pack + "_mp4"
             os.makedirs(mp4_dir, exist_ok=True)
             upscaled_dir = pack + "_upscaled"
@@ -495,9 +495,9 @@ class MainMenu:
             print("👉 Resizing images if needed...")
             batch_resize(images, upscaled_dir, target_width=2500, target_height=0)
 
-            print("👉 Transcoding resized images into .avif...")
+            print("👉 Transcoding resized images into lossy .jxl...")
             failed_avif_transcode = batch_transcode(
-                list_files(upscaled_dir, [".png"], True), avif_dir, "avif", Config.overwrite, 1
+                list_files(upscaled_dir, [".png"], True), dist_dir, "jxl_lossy", Config.overwrite, 1
             )[0]
 
             print("👉 Transcoding animations into .mp4 (av1)...")
@@ -514,8 +514,8 @@ class MainMenu:
                 print(f"  Failed to archive {jxl_dir} to 7z") if failed_archive_jxl != "" else shutil.rmtree(jxl_dir)
 
             print("👉 Archiving .avif, .mp4 (av1) files into .zip...")
-            failed_archive_avif = single_compress(avif_dir, pack, "zip", [".avif", ".mp4"])
-            print(f"  Failed to archive {avif_dir} to zip") if failed_archive_avif != "" else shutil.rmtree(avif_dir)
+            failed_archive_dist = single_compress(dist_dir, pack, "zip", [".jxl", ".avif", ".mp4"])
+            print(f"  Failed to archive {dist_dir} to zip") if failed_archive_dist != "" else shutil.rmtree(dist_dir)
 
             shutil.rmtree(png_dir) if reprocess else None
             message = f"{progress} | {pack}"
