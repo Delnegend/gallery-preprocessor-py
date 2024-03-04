@@ -4,10 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-requests = "*"
 chardet = "*"
+ffpb = "*"
 
 [dev-packages]
 ruff = "*"
 black = "*"
 isort = "*"
+tomli = "*"
